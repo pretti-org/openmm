@@ -683,16 +683,29 @@ jobs:
       fail-fast: false
       matrix:
         include:
-          - name: Linux GPU
+          - name: Linux GPU OpenCL
             python-version: "3.13"
             env: ubuntu-arm
             CMAKE_FLAGS: |
-              -DOPENMM_BUILD_CPU_TESTS=OFF \
-              -DOPENMM_BUILD_C_AND_FORTRAN_WRAPPERS=OFF \
-              -DOPENMM_BUILD_EXAMPLES=OFF \
+              -DOPENMM_BUILD_CUDA_TESTS=OFF \
+              -DOPENMM_BUILD_CPU_LIB=OFF \
               -DOPENMM_BUILD_PYTHON_WRAPPERS=OFF \
               -DOPENMM_BUILD_REFERENCE_TESTS=OFF \
               -DOPENMM_BUILD_SERIALIZATION_TESTS=OFF \
+              -DOPENMM_BUILD_C_AND_FORTRAN_WRAPPERS=OFF \
+              -DOPENMM_BUILD_EXAMPLES=OFF \
+
+          - name: Linux GPU CUDA
+            python-version: "3.13"
+            env: ubuntu-arm
+            CMAKE_FLAGS: |
+              -DOPENMM_BUILD_OPENCL_TESTS=OFF \
+              -DOPENMM_BUILD_CPU_LIB=OFF \
+              -DOPENMM_BUILD_PYTHON_WRAPPERS=OFF \
+              -DOPENMM_BUILD_REFERENCE_TESTS=OFF \
+              -DOPENMM_BUILD_SERIALIZATION_TESTS=OFF \
+              -DOPENMM_BUILD_C_AND_FORTRAN_WRAPPERS=OFF \
+              -DOPENMM_BUILD_EXAMPLES=OFF \
 
     steps:
       - uses: actions/checkout@v7
@@ -720,10 +733,13 @@ jobs:
         shell: bash -l {0}
         run: |
           cd build
-          make -j4 install
+          make -j10 install
 
       - name: "Test OpenMM"
         shell: bash -l {0}
         run: |
           cd build
-          python ../devtools/run-ctest.py --parallel 4 --timeout 600 --job-duration 900 --attempts 3
+          python ../devtools/run-ctest.py --parallel 2 --timeout 600 --job-duration 900 --attempts 3
+          test -f ${CONDA_PREFIX}/lib/libOpenMM.so
+          test -f ${CONDA_PREFIX}/lib/plugins/libOpenMMCUDA.so
+          test -f ${CONDA_PREFIX}/lib/plugins/libOpenMMOpenCL.so
