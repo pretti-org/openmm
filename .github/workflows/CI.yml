@@ -684,6 +684,8 @@ jobs:
       matrix:
         include:
           - name: Linux GPU
+            python-version: "3.13"
+            env: ubuntu-arm
             CMAKE_FLAGS: |
               -DOPENMM_BUILD_REFERENCE_TESTS=OFF \
               -DOPENMM_BUILD_CPU_TESTS=OFF \
@@ -692,12 +694,34 @@ jobs:
               -DOPENMM_BUILD_PYTHON_WRAPPERS=OFF \
     steps:
       - uses: actions/checkout@v7
-      - name: "Build"
+
+      - uses: conda-incubator/setup-miniconda@v2
+        name: "Prepare base dependencies"
+        with:
+          python-version: ${{ matrix.python-version }}
+          activate-environment: build
+          environment-file: devtools/ci/gh-actions/conda-envs/build-${{ matrix.env }}.yml
+          auto-activate-base: false
+          miniforge-variant: Miniforge3
+          use-mamba: true
+
+      - name: "Configure build with CMake"
+        shell: bash -l {0}
         run: |
           mkdir build
           cd build
           cmake .. \
             -DCMAKE_INSTALL_PREFIX=${CONDA_PREFIX} \
             ${{ matrix.CMAKE_FLAGS }}
+
+      - name: "Build OpenMM"
+        shell: bash -l {0}
+        run: |
+          cd build
           make -j4 install
+
+      - name: "Test OpenMM"
+        shell: bash -l {0}
+        run: |
+          cd build
           python ../devtools/run-ctest.py --parallel 4 --timeout 600 --job-duration 900 --attempts 3
