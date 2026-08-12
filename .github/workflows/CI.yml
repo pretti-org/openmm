@@ -695,7 +695,7 @@ jobs:
     steps:
       - uses: actions/checkout@v7
 
-      - uses: conda-incubator/setup-miniconda@v2
+      - uses: conda-incubator/setup-miniconda@v4
         name: "Prepare base dependencies"
         with:
           python-version: ${{ matrix.python-version }}
