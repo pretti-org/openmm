@@ -690,15 +690,14 @@ jobs:
               -DOPENMM_BUILD_EXAMPLES=OFF \
               -DOPENMM_BUILD_C_AND_FORTRAN_WRAPPERS=OFF \
               -DOPENMM_BUILD_PYTHON_WRAPPERS=OFF \
-        steps:
-          - uses: actions/checkout@v7
-
-          - name: "Build"
-            run: |
-              mkdir build
-              cd build
-              cmake .. \
-                -DCMAKE_INSTALL_PREFIX=${CONDA_PREFIX} \
-                ${{ matrix.CMAKE_FLAGS }}
-              make -j4 install
-              python ../devtools/run-ctest.py --parallel 4 --timeout 600 --job-duration 900 --attempts 3
+      steps:
+        - uses: actions/checkout@v7
+        - name: "Build"
+          run: |
+            mkdir build
+            cd build
+            cmake .. \
+              -DCMAKE_INSTALL_PREFIX=${CONDA_PREFIX} \
+              ${{ matrix.CMAKE_FLAGS }}
+            make -j4 install
+            python ../devtools/run-ctest.py --parallel 4 --timeout 600 --job-duration 900 --attempts 3
