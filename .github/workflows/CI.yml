@@ -733,7 +733,7 @@ jobs:
         shell: bash -l {0}
         run: |
           cd build
-          make -j10 install
+          make -j8 install
 
       - name: "Test OpenMM"
         shell: bash -l {0}
